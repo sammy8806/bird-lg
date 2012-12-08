@@ -29,7 +29,7 @@ from urllib import quote, unquote
 import json
 import random
 
-from toolbox import mask_is_valid, ipv6_is_valid, ipv4_is_valid, resolve, save_cache_pickle, load_cache_pickle, unescape
+from toolbox import mask_is_valid, ipv6_is_valid, ipv4_is_valid, resolve, save_cache_pickle, load_cache_pickle, get_asname_from_whois, unescape
 #from xml.sax.saxutils import escape
 
 
@@ -44,15 +44,6 @@ app.debug = app.config["DEBUG"]
 file_handler = TimedRotatingFileHandler(filename=app.config["LOG_FILE"], when="midnight")
 file_handler.setLevel(getattr(logging, app.config["LOG_LEVEL"].upper()))
 app.logger.addHandler(file_handler)
-
-
-def get_asn_from_as(n):
-    asn_zone = app.config.get("ASN_ZONE", "asn.cymru.com")
-    try:
-        data = resolve("AS%s.%s" % (n, asn_zone) ,"TXT").replace("'","").replace('"','')
-    except:
-        return " "*5
-    return [ field.strip() for field in data.split("|") ]
 
 
 def add_links(text):
@@ -375,7 +366,7 @@ def get_as_name(_as):
     if not _as.isdigit():
         return _as.strip()
 
-    name = get_asn_from_as(_as)[-1].replace(" ","\r",1)
+    name = get_asname_from_whois(whois_command('AS' + _as)).replace(" ","\r",1)
     return "AS%s | %s" % (_as, name)
 
 
