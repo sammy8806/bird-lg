@@ -19,6 +19,8 @@
 #
 ###
 
+from toolboxconfig import ASN_ZONE
+
 from dns import resolver
 import socket
 import pickle
@@ -28,7 +30,7 @@ def resolve(n, q):
 	return str(resolver.query(n,q)[0])
 
 def get_asn_from_as(n):
-    data = resolve("AS%s.asn.cymru.com" % n ,"TXT").replace("'","").replace('"','')
+    data = resolve("AS%s.%s" % (n, ASN_ZONE) ,"TXT").replace("'","").replace('"','')
     return [ field.strip() for field in data.split("|") ]
 
 def mask_is_valid(n):
