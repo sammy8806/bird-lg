@@ -1,7 +1,14 @@
+# Configuration file for lgproxy.py
+# Copy to lgproxy.cfg and edit to suit your needs.
 
-DEBUG=False
-LOG_FILE="/var/log/lg-proxy/lg-proxy.log"
-LOG_LEVEL="WARNING"
-ACCESS_LIST = ["91.224.149.206", "178.33.111.110"]
-IPV4_SOURCE="91.224.148.1"
-IPV6_SOURCE="2a01:6600:8000::1"
+DEBUG = False
+
+LOG_FILE = "/var/log/bird-lg/lgproxy.log"
+LOG_LEVEL = "WARNING"
+
+# Who can connect to the proxy to launch Bird commands
+ACCESS_LIST = ["192.0.2.42", "2001:db8::42"]
+
+# Source IP for traceroute/traceroute6
+IPV4_SOURCE = "192.0.2.1"
+IPV6_SOURCE = "2001:db8::1"
