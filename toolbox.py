@@ -28,7 +28,7 @@ import re
 def resolve(n, q):
 	return str(resolver.query(n,q)[0])
 
-asname_regex = re.compile("as-name:\s+(?P<name>\S+)")
+asname_regex = re.compile("(ASName|as-name):\s+(?P<name>\S+)")
 
 def get_asname_from_whois(data):
     r = asname_regex.search(data)
