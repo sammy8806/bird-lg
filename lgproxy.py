@@ -52,13 +52,16 @@ def access_log_after(response, *args, **kwargs):
 
 
 def check_accesslist():
-    if app.config["ACCESS_LIST"] and request.remote_addr not in app.config["ACCESS_LIST"]:
-        abort(401)
+    acl = app.config["ACCESS_LIST"]
+    if acl and request.remote_addr not in acl:
+        app.logger.warning("Remote address not in ACCESS_LIST: %s", request.remote_addr)
+	abort(401)
 
 
 def check_features():
     features = app.config.get('FEATURES', [])
-    if request.endpoint not in features:
+    if features and request.endpoint not in features:
+        app.logger.warning("Requested endpoint not in FEATURES: %s", request.endpoint)
         abort(401)
 
 
