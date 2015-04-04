@@ -24,6 +24,7 @@ from collections import defaultdict
 from logging.handlers import TimedRotatingFileHandler
 from urllib import quote, unquote
 from urllib2 import urlopen
+
 import json
 import logging
 import memcache
@@ -58,15 +59,6 @@ def get_asn_from_as(n):
     except:
         return " " * 5
     return [field.strip() for field in data.split("|")]
-
-
-def get_asn_from_as(n):
-    asn_zone = app.config.get("ASN_ZONE", "asn.cymru.com")
-    try:
-        data = resolve("AS%s.%s" % (n, asn_zone) ,"TXT").replace("'","").replace('"','')
-    except:
-        return " "*5
-    return [ field.strip() for field in data.split("|") ]
 
 
 def add_links(text):
