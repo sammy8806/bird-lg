@@ -30,7 +30,7 @@ from urllib import quote, unquote
 import json
 import random
 
-from toolbox import mask_is_valid, ipv6_is_valid, ipv4_is_valid, resolve, save_cache_pickle, load_cache_pickle, unescape
+from toolbox import mask_is_valid, ipv6_is_valid, ipv4_is_valid, resolve, save_cache_pickle, load_cache_pickle, get_asname_from_whois, unescape
 #from xml.sax.saxutils import escape
 
 
@@ -49,15 +49,6 @@ app.logger.addHandler(file_handler)
 memcache_server = app.config.get("MEMCACHE_SERVER", "127.0.0.1:11211")
 memcache_expiration = int(app.config.get("MEMCACHE_EXPIRATION", "1296000")) # 15 days by default
 mc = memcache.Client([memcache_server])
-
-def get_asn_from_as(n):
-    asn_zone = app.config.get("ASN_ZONE", "asn.cymru.com")
-    try:
-        data = resolve("AS%s.%s" % (n, asn_zone) ,"TXT").replace("'","").replace('"','')
-    except:
-        return " "*5
-    return [ field.strip() for field in data.split("|") ]
-
 
 def add_links(text):
     """Browser a string and replace ipv4, ipv6, as number, with a
@@ -221,8 +212,6 @@ def whois():
 
 
 SUMMARY_UNWANTED_PROTOS = ["Kernel", "Static", "Device"]
-SUMMARY_RE_MATCH = r"(?P<name>[\w_]+)\s+(?P<proto>\w+)\s+(?P<table>\w+)\s+(?P<state>\w+)\s+(?P<since>((|\d\d\d\d-\d\d-\d\d\s)(|\d\d:)\d\d:\d\d|\w\w\w\d\d))($|\s+(?P<info>.*))"
-
 
 @app.route("/summary/<hosts>")
 @app.route("/summary/<hosts>/<proto>")
@@ -249,9 +238,16 @@ def summary(hosts, proto="ipv4"):
         for line in res[1:]:
             line = line.strip()
             if line and (line.split() + [""])[1] not in SUMMARY_UNWANTED_PROTOS:
-                m = re.match(SUMMARY_RE_MATCH, line)
-                if m:
-                    data.append(m.groupdict())
+                split = line.split()
+                if len(split) >= 5:
+                    props = dict()
+                    props["name"] = split[0]
+                    props["proto"] = split[1]
+                    props["table"] = split[2]
+                    props["state"] = split[3]
+                    props["since"] = split[4]
+                    props["info"] = ' '.join(split[5:]) if len(split) > 5 else ""
+                    data.append(props)
                 else:
                     app.logger.warning("couldn't parse: %s", line)
 
@@ -374,12 +370,7 @@ def get_as_name(_as):
     if not _as.isdigit():
         return _as.strip()
 
-    name = mc.get(str('lg_%s' % _as))
-    if not name:
-        app.logger.info("asn for as %s not found in memcache", _as)
-        name = get_asn_from_as(_as)[-1].replace(" ","\r",1)
-        if name:
-            mc.set(str("lg_%s" % _as), str(name), memcache_expiration)
+    name = get_asname_from_whois(whois_command('AS' + _as)).replace(" ","\r",1)
     return "AS%s | %s" % (_as, name)
 
 

@@ -96,9 +96,12 @@ def traceroute():
 def bird():
     check_accesslist()
 
-    if request.path == "/bird": b = BirdSocket(file="/var/run/bird.ctl")
-    elif request.path == "/bird6": b = BirdSocket(file="/var/run/bird6.ctl")
-    else: return "No bird socket selected"
+    if request.path == "/bird":
+        b = BirdSocket(file=app.config.get("BIRD_SOCKET", "/var/run/bird.ctl"))
+    elif request.path == "/bird6":
+        b = BirdSocket(file=app.config.get("BIRD6_SOCKET", "/var/run/bird6.ctl"))
+    else:
+        return "No bird socket selected"
 
     query = request.args.get("q","")
     query = unquote(query)
@@ -111,5 +114,5 @@ def bird():
 
 if __name__ == "__main__":
     app.logger.info("lgproxy start")
-    app.run("0.0.0.0")
+    app.run(app.config.get("BIND_IP", "0.0.0.0"), app.config.get("BIND_PORT", 5000))
 

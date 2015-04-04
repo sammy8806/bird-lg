@@ -48,7 +48,10 @@ bird-lg depends on :
 
 Each services can be embedded in any webserver by following regular python-flask configuration.
 
-Only tested with bird 1.2.5.
+You should copy the configuration files (`lgproxy.cfg.example` to `lgproxy.cfg`
+and `lg.cfg.example` to `lg.cfg`) and edit them.
+
+Should work with most Bird versions (from 1.2.x, tested up to 1.4.5).
 
 Source code is under GPL 3.0, powered by Flask, jQuery and Bootstrap.
 

@@ -23,6 +23,7 @@ from dns import resolver
 import socket
 import pickle
 import xml.parsers.expat
+import re
 
 resolv = resolver.Resolver()
 resolv.timeout = 0.5
@@ -31,8 +32,16 @@ resolv.lifetime = 1
 def resolve(n, q):
 	return str(resolv.query(n,q)[0])
 
+asname_regex = re.compile("(ASName|as-name):\s+(?P<name>\S+)")
+
+def get_asname_from_whois(data):
+    r = asname_regex.search(data)
+    if not r:
+        return 'UNKNOWN-AS'
+    return r.groupdict()['name']
+
 def mask_is_valid(n):
-	if not n: 
+	if not n:
 		return True
 	try:
 		mask = int(n)
