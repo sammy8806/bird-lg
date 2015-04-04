@@ -62,6 +62,33 @@ def check_features():
         abort(401)
 
 
+@app.route("/ping")
+@app.route("/ping6")
+def ping():
+    check_accesslist()
+    check_features()
+
+    src = []
+    if request.path == '/ping':
+        ping = 'ping'
+        if app.config.get("IPV4_SOURCE", ""):
+            src = ["-I", app.config.get("IPV4_SOURCE")]
+    else:
+        ping = 'ping6'
+        if app.config.get("IPV6_SOURCE", ""):
+            src = ["-I", app.config.get("IPV6_SOURCE")]
+
+    query = request.args.get("q", "")
+    query = unquote(query)
+
+    options = ['-c4', '-i1', '-w5']
+
+    command = [ping] + src + options + [query]
+    result = subprocess.Popen(command, stdout=subprocess.PIPE).communicate()[0].decode('utf-8', 'ignore').replace("\n", "<br>")
+
+    return result
+
+
 @app.route("/traceroute")
 @app.route("/traceroute6")
 def traceroute():

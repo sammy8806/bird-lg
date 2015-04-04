@@ -158,6 +158,7 @@ def bird_proxy(host, proto, service, query):
 @app.context_processor
 def inject_commands():
     commands = [
+	("ping", "ping ..."),
         ("traceroute", "traceroute ..."),
         ("summary", "show protocols"),
         ("detail", "show protocols ... all"),
@@ -295,6 +296,38 @@ def detail(hosts, proto):
         detail[host] = {"status": res[1], "description": add_links(res[2:])}
 
     return render_template('detail.html', detail=detail, command=command, errors=errors)
+
+
+@app.route("/ping/<hosts>/<proto>")
+def ping(hosts, proto):
+    q = get_query()
+
+    if not q:
+        abort(400)
+
+    set_session("ping", hosts, proto, q)
+
+    if proto == "ipv6" and not ipv6_is_valid(q):
+        try:
+            q = resolve(q, "AAAA")
+        except:
+            return error_page("%s is unresolvable or invalid for %s" % (q, proto))
+    if proto == "ipv4" and not ipv4_is_valid(q):
+        try:
+            q = resolve(q, "A")
+        except:
+            return error_page("%s is unresolvable or invalid for %s" % (q, proto))
+
+    errors = []
+    infos = {}
+    for host in hosts.split("+"):
+        status, resultat = bird_proxy(host, proto, "ping", q)
+        if status is False:
+            errors.append("%s" % resultat)
+            continue
+
+        infos[host] = add_links(resultat)
+    return render_template('ping.html', infos=infos, errors=errors)
 
 
 @app.route("/traceroute/<hosts>/<proto>")
