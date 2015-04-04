@@ -20,7 +20,6 @@
 ###
 
 from dns import resolver, reversename
-from toolboxconfig import ASN_ZONE
 
 import socket
 import pickle

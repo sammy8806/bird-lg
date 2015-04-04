@@ -721,7 +721,7 @@ def show_route(request_type, hosts, proto):
             continue
 
         if bgpmap:
-            if app.config['BIRD_HAS_FULL_VIEW']:
+            if app.config.get('BIRD_HAS_FULL_VIEW', False):
                 detail = build_as_tree_from_full_view(host, proto, res)
             else:
                 detail[host] = build_as_tree_from_raw_bird_ouput(host, proto, res)
