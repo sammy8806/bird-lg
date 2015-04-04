@@ -20,6 +20,8 @@
 ###
 
 from dns import resolver, reversename
+from toolboxconfig import ASN_ZONE
+
 import socket
 import pickle
 import xml.parsers.expat
@@ -39,7 +41,6 @@ app.config.from_pyfile('lg.cfg')
 def resolve(n, q):
     return str(resolv.query(n, q)[0])
 
-
 def resolve_ptr(ip):
     ptr = str(resolve(reversename.from_address(ip), 'PTR')).lower()
     ptr = ptr.replace(app.config.get('ROUTER_NAME_REMOVE', ''), '')
@@ -53,6 +54,7 @@ def get_asname_from_whois(data):
     if not r:
         return 'UNKNOWN-AS'
     return r.groupdict()['name']
+
 
 def mask_is_valid(n):
     if not n:
