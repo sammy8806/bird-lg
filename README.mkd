@@ -33,6 +33,12 @@ Software is split in two parts:
                                          ***************
 ```
 
+Installation
+------------
+
+```
+apt-get install python-memcache python-flask python-pydot python-dnspython libapache2-mod-wsgi
+```
 
 bird-lg depends on :
 
