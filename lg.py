@@ -51,6 +51,7 @@ memcache_server = app.config.get("MEMCACHE_SERVER", "127.0.0.1:11211")
 memcache_expiration = int(app.config.get("MEMCACHE_EXPIRATION", "1296000"))  # 15 days by default
 mc = memcache.Client([memcache_server])
 
+default_lookup_table = " table %s" % app.config.get("DEFAULT_TABLE", "master")
 
 def get_asn_from_as(n):
     asn_zone = app.config.get("ASN_ZONE", "asn.cymru.com")
@@ -224,7 +225,7 @@ def whois():
     return jsonify(output=output, title=query)
 
 
-SUMMARY_UNWANTED_PROTOS = ["Kernel", "Static", "Device"]
+SUMMARY_UNWANTED_PROTOS = ["Kernel", "Static", "Device", "Pipe"]
 
 @app.route("/summary/<hosts>")
 @app.route("/summary/<hosts>/<proto>")
@@ -698,11 +699,11 @@ def show_route(request_type, hosts, proto):
         all = " all"
 
     if request_type.startswith("adv"):
-        command = "show route " + expression.strip()
+        command = "show route " + expression.strip() + default_lookup_table
         if bgpmap and not command.endswith("all"):
             command = command + " all"
     elif request_type.startswith("where"):
-        command = "show route where net ~ [ " + expression + " ]" + all
+        command = "show route where net ~ [ " + expression + " ]" + all + default_lookup_table
     else:
         mask = ""
         if len(expression.split("/")) == 2:
@@ -729,7 +730,7 @@ def show_route(request_type, hosts, proto):
         if mask:
             expression += "/" + mask
 
-        command = "show route for " + expression + all
+        command = "show route for " + expression + all + default_lookup_table
 
     detail = {}
     errors = []
